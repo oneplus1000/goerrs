@@ -59,6 +59,15 @@ func (w *wrapErrWithCallStack) Format(f fmt.State, verb rune) {
 	io.WriteString(f, w.Error())
 }
 
+//WrapCallStack wrap error message with call stack
+func WrapCallStack(err error) error {
+	return &wrapErrWithCallStack{
+		msg:    err.Error(),
+		caller: caller(),
+		err:    err,
+	}
+}
+
 //WrapCallStackf wrap error message with call stack
 //(format wrap error message use %v instead of %w)
 func WrapCallStackf(format string, args ...interface{}) error {
