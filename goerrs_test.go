@@ -1,31 +1,29 @@
 package goerrs
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
+	"strings"
 	"testing"
 )
 
-var errX = New("error xxxx not found")
+var errX = errors.New("error xxxx not found")
 
 func TestCallers(t *testing.T) {
 	err := sub3()
-	fmt.Printf("%+v\n", err)
-	//PrintCallStack(err)
-	/*var errtmp = err
-	i := 0
-	for errtmp != nil {
-		fmt.Printf("%d) %s\n", i, errtmp.Error())
-		errtmp = errors.Unwrap(errtmp)
-		i++
-	}*/
-
+	if val, ok := err.(WrapErrWithCallStacker); ok {
+		if strings.TrimSpace(val.Caller().FileName) == "" || strings.TrimSpace(val.Caller().FuncName) == "" {
+			t.Error("Caller is Empty")
+		}
+	} else {
+		t.Error("error not WrapErrWithCallStacker")
+	}
 }
 
 func sub3() error {
 	err := sub2()
 	if err != nil {
-		return Wrapf("%v sub2 fail", err)
+		return WrapCallStackf("%v sub2 fail", err)
 		//return fmt.Errorf("%w", err)
 	}
 	return nil
@@ -35,7 +33,7 @@ func sub2() error {
 	err := sub1()
 	if err != nil {
 		//return Wrapf("%+v in sub2", err)
-		return fmt.Errorf("%w cccc", err)
+		return WrapCallStackf("%v cccc", err)
 	}
 	return nil
 }
